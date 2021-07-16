@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Postback API</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
+
+  <style>
+    .wrapper {
+      padding: 2rem;
+    }
+
+    h4 {
+      padding: 0.8rem 1.4rem;
+      background-color: #46a5ff24;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h1>Postback API</h1>
+
+    <blockquote>
+      <p>
+        Use a URL <strong><span class="default-url">http</span>postback/*</strong> com qualquer
+        terminação para testar o postback.
+        As consultas aparecerão nesta tela.
+        Por exemplo:
+        <br />
+        <br /><span class="default-url">http</span>postback/transfer-confirmation
+        <br /><span class="default-url">http</span>postback/transfer-notification
+      </p>
+    </blockquote>
+
+    <p>
+      Você pode mudar o comportamento das respostas das requests editando o arquivo
+      <strong>responses.js</strong>.
+      Basta acrescentar requisitos aplicáveis dentro da tag <strong>request</strong> e usar
+      a tag <strong>response</strong> para definir o "status" e o "body" desejado.
+      Em caso de conflito de regras, a primeira que cumprir os requisitos será aplicada.
+    </p>
+
+    <section id="requests"></section>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    updateURL();
+    var socket = io();
+
+    var requests = document.getElementById('requests');
+    
+    socket.on('request', function(request) {
+      addRequest(request);
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+
+    function addRequest(request) {
+      var article = document.createElement('article');
+      
+      var time = new Date(request.ts);
+      var title = document.createElement('h4');
+      title.title = time;
+      title.innerHTML = `<strong>${request.method}</strong> ${request.path}`;
+      
+      var headers = getCodeTag(request);
+
+      article.appendChild(title);
+      article.appendChild(headers);
+      requests.appendChild(article);
+    }
+
+    function getCodeTag(content) {
+      var pre = document.createElement('pre');
+      var code = document.createElement('code');
+      code.textContent = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+      pre.appendChild(code);
+      return pre;
+    }
+
+    function updateURL() {
+      var url = document.URL;
+      var spans = document.getElementsByClassName('default-url');
+      for (let index = 0; index < spans.length; index++) {
+        const span = spans.item(index);
+        span.textContent = document.URL;
+      }
+    }
+  </script>
+</body>
+</html>
