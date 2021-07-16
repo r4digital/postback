@@ -17,8 +17,30 @@
 
     h4 {
       padding: 0.8rem 1.4rem;
-      background-color: #46a5ff24;
+      background-color: #a9d5ff24;
+      cursor: pointer;
     }
+
+    h4.get { background-color: #14f90024; }
+    h4.post { background-color: #0083ff24; }
+    h4.put { background-color: #ffe60024; }
+    h4.patch { background-color: #ffa00024; }
+    h4.delete { background-color: #ff464624; }
+
+    .hidden { display: none; }
+    .time { font-size: 12pt; }
+
+    .arrow {
+      border: solid #797979;
+      border-width: 0 2px 2px 0;
+      display: inline-block;
+      padding: 6px;
+      margin-right: 5px;
+      transform: rotate(45deg);
+      -webkit-transform: rotate(45deg);
+    }
+
+    article > pre { margin-top: -18px; }
   </style>
 </head>
 <body>
@@ -63,23 +85,45 @@
     function addRequest(request) {
       var article = document.createElement('article');
       
-      var time = new Date(request.ts);
-      var title = document.createElement('h4');
-      title.title = time;
-      title.innerHTML = `<strong>${request.method}</strong> ${request.path}`;
-      
-      var headers = getCodeTag(request);
+      var title = getTitleTag(request);
+      var code = getCodeTag(request.ts, request);
 
       article.appendChild(title);
-      article.appendChild(headers);
+      article.appendChild(code);
       requests.appendChild(article);
     }
 
-    function getCodeTag(content) {
+    function getTitleTag(request) {
+      var title = document.createElement('h4');
+      var time = getTime(request.ts);
+      title.classList.add(request.method.toLowerCase());
+      title.innerHTML = `
+        <i class="arrow"></i>
+        <span class="time">${time}</span>
+        <strong>${request.method}</strong>
+        ${request.path}
+      `;
+      title.onclick = function() {
+        document.getElementById(request.ts).classList.toggle('hidden');
+      };
+      return title;
+    }
+
+    function getTime(ts) {
+      var t = new Date(ts);
+      var hh = t.getHours().toString().padStart(2, '0');
+      var mm = t.getMinutes().toString().padStart(2, '0');
+      var ss = t.getSeconds().toString().padStart(2, '0');
+      return `${hh}:${mm}:${ss}`;
+    }
+
+    function getCodeTag(id, content) {
       var pre = document.createElement('pre');
       var code = document.createElement('code');
       code.textContent = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
       pre.appendChild(code);
+      pre.classList.add('hidden');
+      pre.id = id;
       return pre;
     }
 
